@@ -1,5 +1,34 @@
 import React, { useState } from 'react';
-import { BookOpen, GraduationCap, CheckCircle, ChevronRight, Menu, X, Globe, MessageCircle, Star, Trophy, RefreshCcw, Calendar, Clock, Users, Hash, Watch, Layers } from 'lucide-react';
+
+// --- 自定義圖示組件 (使用 Emoji 替代 lucide-react 以確保 100% 穩定性) ---
+// 這種方式完全不依賴外部套件，絕對不會發生 "Element type is invalid" 錯誤
+const IconBase = ({ icon, className, size, onClick }) => (
+  <span 
+    onClick={onClick}
+    className={`inline-flex items-center justify-center leading-none select-none ${className || ''}`} 
+    style={{ 
+      fontSize: size ? `${size}px` : '20px', 
+      fontStyle: 'normal',
+      width: size ? `${size}px` : 'auto',
+      height: size ? `${size}px` : 'auto'
+    }}
+  >
+    {icon}
+  </span>
+);
+
+const BookOpen = (props) => <IconBase icon="📖" {...props} />;
+const GraduationCap = (props) => <IconBase icon="🎓" {...props} />;
+const CheckCircle = (props) => <IconBase icon="✅" {...props} />;
+const ChevronRight = (props) => <IconBase icon="›" {...props} style={{...props.style, fontWeight:'bold'}} />;
+const Menu = (props) => <IconBase icon="☰" {...props} />;
+const X = (props) => <IconBase icon="✕" {...props} />;
+const Globe = (props) => <IconBase icon="🌏" {...props} />;
+const MessageCircle = (props) => <IconBase icon="💬" {...props} />;
+const Star = (props) => <IconBase icon="⭐" {...props} />;
+const Trophy = (props) => <IconBase icon="🏆" {...props} />;
+const RefreshCcw = (props) => <IconBase icon="🔄" {...props} />;
+// Volume2, Calendar, Clock 等在下方直接使用 Emoji 字串，不需要額外組件
 
 // --- 資料庫 (課程內容) ---
 const lessonsData = [
@@ -722,7 +751,7 @@ const lessonsData = [
 const appendixData = {
   numbers: {
     title: "數字 (Numbers)",
-    icon: Hash,
+    icon: "🔢",
     items: [
       // 個位數
       { jp: "0", kana: "ゼロ / れい", romaji: "zero / rei" },
@@ -790,7 +819,7 @@ const appendixData = {
   },
   time: {
     title: "時間 (Time)",
-    icon: Clock,
+    icon: "🕒",
     description: "注意 4、7、9 的唸法。",
     items: [
       { label: "1:00", kana: "いちじ", romaji: "ichiji" },
@@ -830,7 +859,7 @@ const appendixData = {
   },
   timeWords: {
     title: "時候 (Time Words)",
-    icon: Watch,
+    icon: "📅",
     description: "學習天、週、月、年的時間軸說法。",
     tables: [
       {
@@ -897,7 +926,7 @@ const appendixData = {
   },
   counters: {
     title: "量詞 (Counters)",
-    icon: Layers,
+    icon: "📦",
     description: "注意數字與量詞結合時的發音變化，紅色為特殊發音。",
     groups: [
       {
@@ -1186,7 +1215,7 @@ const appendixData = {
   },
   calendar: {
     title: "日期與星期 (Calendar)",
-    icon: Calendar,
+    icon: "🗓️",
     description: "注意4、7、9月的唸法。日期中1-10、14、20、24號是特殊讀音。",
     weekdays: [
       { label: "日", kanji: "日曜日", kana: "にちようび", romaji: "nichiyoubi" },
@@ -1250,7 +1279,7 @@ const appendixData = {
   },
   family: {
     title: "家族稱謂 (Family)",
-    icon: Users,
+    icon: "👨‍👩‍👧‍👦",
     description: "稱呼自己的家人 vs 稱呼別人的家人。",
     items: [
       { relation: "祖父", my: "祖父 (そふ)", other: "おじいさん" },
@@ -1269,6 +1298,16 @@ const appendixData = {
 
 // --- 組件 ---
 
+// 音訊播放 helper 函數
+const playAudio = (text) => {
+  if (!window.speechSynthesis) return;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'ja-JP';
+  utterance.rate = 0.8; // 稍微放慢語速，適合初學者
+  window.speechSynthesis.cancel(); // 播放前先停止之前的語音，避免重疊
+  window.speechSynthesis.speak(utterance);
+};
+
 const VocabularyList = ({ vocab, relatedVocab }) => (
   <div className="space-y-8">
     {/* 核心單字 */}
@@ -1280,6 +1319,7 @@ const VocabularyList = ({ vocab, relatedVocab }) => (
       <table className="min-w-full bg-white rounded-lg overflow-hidden shadow-sm border border-indigo-100">
         <thead className="bg-indigo-50">
           <tr>
+            <th className="py-3 px-4 text-left text-sm font-semibold text-indigo-900 w-12"></th>
             <th className="py-3 px-4 text-left text-sm font-semibold text-indigo-900">漢字</th>
             <th className="py-3 px-4 text-left text-sm font-semibold text-indigo-900">假名</th>
             <th className="py-3 px-4 text-left text-sm font-semibold text-indigo-900 hidden sm:table-cell">羅馬拼音</th>
@@ -1288,7 +1328,16 @@ const VocabularyList = ({ vocab, relatedVocab }) => (
         </thead>
         <tbody className="divide-y divide-indigo-50">
           {vocab.map((word) => (
-            <tr key={word.id} className="hover:bg-indigo-50/50 transition-colors">
+            <tr key={word.id} className="hover:bg-indigo-50/50 transition-colors group">
+              <td className="py-3 px-2 text-center">
+                <button 
+                  onClick={() => playAudio(word.kana || word.kanji)}
+                  className="p-1.5 rounded-full text-indigo-400 hover:text-indigo-600 hover:bg-indigo-100 transition-colors text-lg"
+                  title="播放發音"
+                >
+                  🔊
+                </button>
+              </td>
               <td className="py-3 px-4 text-lg font-medium text-gray-800">{word.kanji}</td>
               <td className="py-3 px-4 text-indigo-600 font-medium">{word.kana}</td>
               <td className="py-3 px-4 text-gray-500 text-sm hidden sm:table-cell">{word.romaji}</td>
@@ -1310,12 +1359,20 @@ const VocabularyList = ({ vocab, relatedVocab }) => (
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {section.list.map((word, idx) => (
-                <div key={idx} className="bg-emerald-50 border border-emerald-100 p-3 rounded-lg flex flex-col">
-                  <div className="flex justify-between items-baseline mb-1">
-                    <span className="text-lg font-bold text-gray-800">{word.kanji}</span>
-                    <span className="text-sm text-emerald-700 font-medium">{word.kana}</span>
+                <div key={idx} className="bg-emerald-50 border border-emerald-100 p-3 rounded-lg flex flex-col relative group">
+                  <div className="flex justify-between items-start mb-1">
+                    <div>
+                      <span className="text-lg font-bold text-gray-800 block">{word.kanji}</span>
+                      <span className="text-sm text-emerald-700 font-medium block">{word.kana}</span>
+                    </div>
+                    <button 
+                      onClick={() => playAudio(word.kana || word.kanji)}
+                      className="p-1.5 rounded-full text-emerald-400 hover:text-emerald-700 hover:bg-emerald-100 transition-colors text-lg"
+                    >
+                      🔊
+                    </button>
                   </div>
-                  <span className="text-sm text-gray-600">{word.meaning}</span>
+                  <span className="text-sm text-gray-600 mt-1">{word.meaning}</span>
                 </div>
               ))}
             </div>
@@ -1343,9 +1400,17 @@ const GrammarSection = ({ grammar }) => (
           </p>
           <div className="space-y-3">
             {item.examples && item.examples.map((ex, idx) => (
-              <div key={idx} className="border-l-2 border-indigo-200 pl-3">
-                <p className="text-lg text-indigo-700 font-medium leading-snug">{ex.jp}</p>
-                <p className="text-sm text-gray-600">{ex.cn}</p>
+              <div key={idx} className="border-l-2 border-indigo-200 pl-3 flex items-start group">
+                <button 
+                  onClick={() => playAudio(ex.jp)}
+                  className="mr-2 mt-1 p-1 rounded-full text-indigo-300 hover:text-indigo-600 hover:bg-indigo-100 transition-colors flex-shrink-0 text-lg"
+                >
+                  🔊
+                </button>
+                <div>
+                  <p className="text-lg text-indigo-700 font-medium leading-snug">{ex.jp}</p>
+                  <p className="text-sm text-gray-600">{ex.cn}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -1459,13 +1524,14 @@ const QuizSection = ({ quiz, isReviewMode = false }) => {
 const AppendixSection = () => {
   const [activeCategory, setActiveCategory] = useState('numbers');
   
+  // 使用Emoji代替圖示，確保100%穩定性
   const categories = [
-    { id: 'numbers', label: '數字', icon: appendixData.numbers.icon },
-    { id: 'time', label: '時間', icon: appendixData.time.icon },
-    { id: 'timeWords', label: '時候', icon: appendixData.timeWords.icon },
-    { id: 'calendar', label: '日期', icon: appendixData.calendar.icon },
-    { id: 'counters', label: '量詞', icon: appendixData.counters.icon },
-    { id: 'family', label: '家族', icon: appendixData.family.icon },
+    { id: 'numbers', label: '數字', icon: '🔢' },
+    { id: 'time', label: '時間', icon: '🕒' },
+    { id: 'timeWords', label: '時候', icon: '📅' },
+    { id: 'calendar', label: '日期', icon: '🗓️' },
+    { id: 'counters', label: '量詞', icon: '📦' },
+    { id: 'family', label: '家族', icon: '👨‍👩‍👧‍👦' },
   ];
 
   const renderContent = () => {
@@ -1474,11 +1540,16 @@ const AppendixSection = () => {
         return (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {appendixData.numbers.items.map((item, idx) => (
-              <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm text-center">
+              <button 
+                key={idx} 
+                onClick={() => playAudio(item.kana)}
+                className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm text-center hover:border-indigo-300 hover:bg-indigo-50 transition-all group"
+              >
+                <div className="flex justify-center mb-1 text-indigo-300 group-hover:text-indigo-500 text-xl">🔊</div>
                 <div className="text-2xl font-bold text-indigo-600 mb-1">{item.jp}</div>
                 <div className="text-sm font-medium text-gray-800 mb-1">{item.kana}</div>
                 <div className="text-xs text-gray-500">{item.romaji}</div>
-              </div>
+              </button>
             ))}
           </div>
         );
@@ -1489,11 +1560,16 @@ const AppendixSection = () => {
               <h4 className="font-bold text-gray-700 mb-3 border-l-4 border-indigo-500 pl-2">時段 (Period)</h4>
               <div className="flex gap-4">
                 {appendixData.time.periods.map((item, idx) => (
-                  <div key={idx} className="bg-indigo-50 px-4 py-3 rounded-lg border border-indigo-100 flex-1 text-center">
+                  <button 
+                    key={idx} 
+                    onClick={() => playAudio(item.kana)}
+                    className="bg-indigo-50 px-4 py-3 rounded-lg border border-indigo-100 flex-1 text-center hover:bg-indigo-100 transition-colors"
+                  >
+                    <div className="flex justify-center mb-1 text-indigo-300 text-lg">🔊</div>
                     <div className="font-bold text-indigo-800 text-lg mb-1">{item.label}</div>
                     <div className="text-sm text-gray-600">{item.kana}</div>
                     <div className="text-xs text-gray-400">{item.romaji}</div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -1501,14 +1577,19 @@ const AppendixSection = () => {
               <h4 className="font-bold text-gray-700 mb-3 border-l-4 border-indigo-500 pl-2">小時 (Hour)</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {appendixData.time.items.map((item, idx) => (
-                  <div key={idx} className={`bg-white p-3 rounded-lg border ${item.highlight ? 'border-red-300 bg-red-50' : 'border-gray-200'} shadow-sm`}>
+                  <button 
+                    key={idx} 
+                    onClick={() => playAudio(item.kana)}
+                    className={`bg-white p-3 rounded-lg border ${item.highlight ? 'border-red-300 bg-red-50' : 'border-gray-200'} shadow-sm hover:border-indigo-300 hover:bg-indigo-50 transition-all text-left w-full`}
+                  >
                     <div className="flex justify-between items-center mb-1">
                       <span className="font-bold text-gray-800">{item.label}</span>
+                      <span className="text-gray-400 text-lg">🔊</span>
                       {item.highlight && <span className="text-[10px] bg-red-100 text-red-600 px-1 rounded">注意</span>}
                     </div>
                     <div className={`text-sm ${item.highlight ? 'text-red-700 font-bold' : 'text-gray-600'}`}>{item.kana}</div>
                     <div className="text-xs text-gray-400">{item.romaji}</div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -1516,11 +1597,18 @@ const AppendixSection = () => {
               <h4 className="font-bold text-gray-700 mb-3 border-l-4 border-indigo-500 pl-2">分鐘 (Minute)</h4>
                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {appendixData.time.minutes.map((item, idx) => (
-                  <div key={idx} className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
-                    <div className="font-bold text-gray-800 mb-1">{item.label}</div>
+                  <button 
+                    key={idx} 
+                    onClick={() => playAudio(item.kana)}
+                    className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm hover:border-indigo-300 hover:bg-indigo-50 transition-all text-left w-full"
+                  >
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-bold text-gray-800">{item.label}</span>
+                      <span className="text-gray-400 text-lg">🔊</span>
+                    </div>
                     <div className="text-sm text-gray-600">{item.kana}</div>
                     <div className="text-xs text-gray-400">{item.romaji}</div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -1532,7 +1620,7 @@ const AppendixSection = () => {
             {appendixData.timeWords.tables.map((table, tIdx) => (
               <div key={tIdx}>
                 <h4 className="font-bold text-gray-700 mb-4 flex items-center">
-                  <span className="bg-indigo-600 text-white p-1 rounded mr-2"><Clock size={16}/></span>
+                  <span className="bg-indigo-600 text-white p-1 rounded mr-2 text-xl">🕒</span>
                   {table.title}
                 </h4>
                 
@@ -1558,7 +1646,13 @@ const AppendixSection = () => {
                             {row.label}
                           </td>
                           {row.cells.map((cell, cIdx) => (
-                            <td key={cIdx} className="py-3 px-2 text-center align-top">
+                            <td key={cIdx} className="py-3 px-2 text-center align-top relative group">
+                              <button 
+                                onClick={() => playAudio(cell.kana || cell.jp)}
+                                className="absolute top-1 right-1 p-1 text-gray-300 hover:text-indigo-500 transition-colors text-sm"
+                              >
+                                🔊
+                              </button>
                               <div className="text-lg font-bold text-gray-800">{cell.jp}</div>
                               <div className="text-xs text-gray-500 font-medium mt-0.5">{cell.kana}</div>
                             </td>
@@ -1568,7 +1662,7 @@ const AppendixSection = () => {
                     </tbody>
                   </table>
                 </div>
-                <p className="text-xs text-gray-400 mt-2 text-right">* 手機版可左右滑動查看完整表格</p>
+                <p className="text-xs text-gray-400 mt-2 text-right">* 手機版可左右滑動查看完整表格，點擊單字可發音</p>
               </div>
             ))}
           </div>
@@ -1580,11 +1674,16 @@ const AppendixSection = () => {
               <h4 className="font-bold text-gray-700 mb-3 border-l-4 border-indigo-500 pl-2">星期 (Weekdays)</h4>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {appendixData.calendar.weekdays.map((item, idx) => (
-                  <div key={idx} className="bg-indigo-50 p-3 rounded-md border border-indigo-100 text-center">
+                  <button 
+                    key={idx} 
+                    onClick={() => playAudio(item.kana)}
+                    className="bg-indigo-50 p-3 rounded-md border border-indigo-100 text-center hover:bg-indigo-100 transition-colors group"
+                  >
+                    <div className="flex justify-center mb-1 text-indigo-300 text-lg">🔊</div>
                     <div className="text-xs text-indigo-400 font-bold mb-1">{item.label}</div>
                     <div className="font-bold text-indigo-800 text-lg">{item.kanji}</div>
                     <div className="text-xs text-gray-600 mt-1">{item.kana}</div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -1592,14 +1691,19 @@ const AppendixSection = () => {
               <h4 className="font-bold text-gray-700 mb-3 border-l-4 border-indigo-500 pl-2">月份 (Months)</h4>
               <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
                  {appendixData.calendar.months.map((item, idx) => (
-                  <div key={idx} className={`bg-white p-3 rounded-lg border ${item.highlight ? 'border-red-300 bg-red-50' : 'border-gray-200'} shadow-sm`}>
+                  <button 
+                    key={idx} 
+                    onClick={() => playAudio(item.kana)}
+                    className={`bg-white p-3 rounded-lg border ${item.highlight ? 'border-red-300 bg-red-50' : 'border-gray-200'} shadow-sm hover:border-indigo-300 hover:bg-indigo-50 transition-all text-left w-full`}
+                  >
                     <div className="flex justify-between items-center mb-1">
                       <span className="font-bold text-gray-800">{item.label}</span>
+                      <span className="text-gray-400 text-lg">🔊</span>
                       {item.highlight && <span className="text-[10px] bg-red-100 text-red-600 px-1 rounded">注意</span>}
                     </div>
                     <div className={`text-sm ${item.highlight ? 'text-red-700 font-bold' : 'text-gray-700'}`}>{item.kana}</div>
                     <div className="text-xs text-gray-400">{item.romaji}</div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -1607,14 +1711,19 @@ const AppendixSection = () => {
               <h4 className="font-bold text-gray-700 mb-3 border-l-4 border-indigo-500 pl-2">日期讀音 (Days)</h4>
               <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
                  {appendixData.calendar.days.map((item, idx) => (
-                  <div key={idx} className={`bg-white p-3 rounded-lg border ${item.highlight ? 'border-orange-300 bg-orange-50' : 'border-gray-200'} shadow-sm`}>
+                  <button 
+                    key={idx} 
+                    onClick={() => playAudio(item.kana || item.romaji)}
+                    className={`bg-white p-3 rounded-lg border ${item.highlight ? 'border-orange-300 bg-orange-50' : 'border-gray-200'} shadow-sm hover:border-indigo-300 hover:bg-indigo-50 transition-all text-left w-full`}
+                  >
                     <div className="flex justify-between items-center mb-1">
                       <span className="font-bold text-gray-800">{item.label}</span>
+                      <span className="text-gray-400 text-xs text-lg">🔊</span>
                       {item.highlight && <span className="text-[10px] bg-orange-200 text-orange-700 px-1 rounded">特</span>}
                     </div>
                     <div className={`text-sm ${item.highlight ? 'text-orange-700 font-bold' : 'text-gray-600'}`}>{item.romaji}</div>
                     <div className="text-xs text-gray-400 mt-1">{item.kana}</div> 
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -1626,7 +1735,7 @@ const AppendixSection = () => {
             {appendixData.counters.groups.map((group, gIdx) => (
               <div key={gIdx}>
                 <h4 className="font-bold text-gray-700 mb-4 flex items-center border-b pb-2">
-                  <span className="bg-emerald-600 text-white p-1 rounded mr-2"><Layers size={16}/></span>
+                  <span className="bg-emerald-600 text-white p-1 rounded mr-2 text-xl">📦</span>
                   {group.label}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -1637,11 +1746,19 @@ const AppendixSection = () => {
                       </div>
                       <div className="divide-y divide-gray-100">
                         {item.list.map((row, rIdx) => (
-                          <div key={rIdx} className="flex px-4 py-2 text-sm hover:bg-gray-50">
-                            <span className="w-8 font-bold text-gray-400">{row.num}</span>
-                            <span className={`flex-1 font-medium ${row.highlight ? 'text-red-600' : 'text-gray-700'}`}>
-                              {row.val}
-                            </span>
+                          <div key={rIdx} className="flex px-4 py-2 text-sm hover:bg-gray-50 items-center justify-between group">
+                            <div className="flex items-center flex-1">
+                              <span className="w-8 font-bold text-gray-400">{row.num}</span>
+                              <span className={`font-medium ${row.highlight ? 'text-red-600' : 'text-gray-700'}`}>
+                                {row.val}
+                              </span>
+                            </div>
+                            <button 
+                              onClick={() => playAudio(row.val)}
+                              className="text-gray-300 hover:text-emerald-500 p-1 text-lg"
+                            >
+                              🔊
+                            </button>
                           </div>
                         ))}
                       </div>
@@ -1665,10 +1782,20 @@ const AppendixSection = () => {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {appendixData.family.items.map((item, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50">
+                  <tr key={idx} className="hover:bg-gray-50 group">
                     <td className="py-3 px-4 font-medium text-gray-800">{item.relation}</td>
-                    <td className="py-3 px-4 text-gray-600">{item.my}</td>
-                    <td className="py-3 px-4 text-gray-600">{item.other}</td>
+                    <td className="py-3 px-4 text-gray-600">
+                      <div className="flex items-center justify-between">
+                        <span>{item.my}</span>
+                        <button onClick={() => playAudio(item.my)} className="text-gray-300 hover:text-indigo-500 text-lg">🔊</button>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-gray-600">
+                      <div className="flex items-center justify-between">
+                        <span>{item.other}</span>
+                        <button onClick={() => playAudio(item.other)} className="text-gray-300 hover:text-emerald-500 text-lg">🔊</button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -1693,7 +1820,7 @@ const AppendixSection = () => {
                 : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
             }`}
           >
-            <cat.icon size={16} className="mr-2" />
+            <span className="mr-2 text-lg">{cat.icon}</span>
             {cat.label}
           </button>
         ))}
@@ -1773,7 +1900,7 @@ const App = () => {
               <Menu size={24} />
             </button>
             <div className="flex items-center space-x-2">
-              <Globe size={24} className="text-indigo-200" />
+              <Globe size={24} />
               <h1 className="text-xl font-bold tracking-wide">大家的日本語 <span className="text-indigo-200 text-sm font-normal hidden sm:inline">| 數位教室</span></h1>
             </div>
           </div>
