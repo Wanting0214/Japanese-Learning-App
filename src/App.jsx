@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from 'react';
-import { BookOpen, GraduationCap, CheckCircle, ChevronRight, Menu, X, Globe, MessageCircle, Star, Shuffle, Trophy, RefreshCcw } from 'lucide-react';
+import React, { useState } from 'react';
+import { BookOpen, GraduationCap, CheckCircle, ChevronRight, Menu, X, Globe, MessageCircle, Star, Trophy, RefreshCcw, Calendar, Clock, Users, Hash, Watch, Layers } from 'lucide-react';
 
-// --- 資料庫 (含擴充單字、關聯單字、多重例句、擴充題庫) ---
+// --- 資料庫 (課程內容) ---
 const lessonsData = [
   {
     id: 1,
@@ -718,6 +718,555 @@ const lessonsData = [
   }
 ];
 
+// --- 附錄資料 ---
+const appendixData = {
+  numbers: {
+    title: "數字 (Numbers)",
+    icon: Hash,
+    items: [
+      // 個位數
+      { jp: "0", kana: "ゼロ / れい", romaji: "zero / rei" },
+      { jp: "1", kana: "いち", romaji: "ichi" },
+      { jp: "2", kana: "に", romaji: "ni" },
+      { jp: "3", kana: "さん", romaji: "san" },
+      { jp: "4", kana: "よん / し", romaji: "yon / shi" },
+      { jp: "5", kana: "ご", romaji: "go" },
+      { jp: "6", kana: "ろく", romaji: "roku" },
+      { jp: "7", kana: "なな / しち", romaji: "nana / shichi" },
+      { jp: "8", kana: "はち", romaji: "hachi" },
+      { jp: "9", kana: "きゅう / く", romaji: "kyuu / ku" },
+      { jp: "10", kana: "じゅう", romaji: "juu" },
+      
+      // 11-20
+      { jp: "11", kana: "じゅういち", romaji: "juuichi" },
+      { jp: "12", kana: "じゅうに", romaji: "juuni" },
+      { jp: "13", kana: "じゅうさん", romaji: "juusan" },
+      { jp: "14", kana: "じゅうよん", romaji: "juuyon" },
+      { jp: "15", kana: "じゅうご", romaji: "juugo" },
+      { jp: "16", kana: "じゅうろく", romaji: "juuroku" },
+      { jp: "17", kana: "じゅうなな", romaji: "juunana" },
+      { jp: "18", kana: "じゅうはち", romaji: "juuhachi" },
+      { jp: "19", kana: "じゅうきゅう", romaji: "juukyuu" },
+      { jp: "20", kana: "にじゅう", romaji: "nijuu" },
+
+      // 十位數
+      { jp: "30", kana: "さんじゅう", romaji: "sanjuu" },
+      { jp: "40", kana: "よんじゅう", romaji: "yonjuu" },
+      { jp: "50", kana: "ごじゅう", romaji: "gojuu" },
+      { jp: "60", kana: "ろくじゅう", romaji: "rokujuu" },
+      { jp: "70", kana: "ななじゅう", romaji: "nanajuu" },
+      { jp: "80", kana: "はちじゅう", romaji: "hachijuu" },
+      { jp: "90", kana: "きゅうじゅう", romaji: "kyuujuu" },
+
+      // 百位數 (注意 300, 600, 800)
+      { jp: "100", kana: "ひゃく", romaji: "hyaku" },
+      { jp: "200", kana: "にひゃく", romaji: "nihyaku" },
+      { jp: "300", kana: "さんびゃく", romaji: "sanbyaku" },
+      { jp: "400", kana: "よんひゃく", romaji: "yonhyaku" },
+      { jp: "500", kana: "ごひゃく", romaji: "gohyaku" },
+      { jp: "600", kana: "ろっぴゃく", romaji: "roppyaku" },
+      { jp: "700", kana: "ななひゃく", romaji: "nanahyaku" },
+      { jp: "800", kana: "はっぴゃく", romaji: "happyaku" },
+      { jp: "900", kana: "きゅうひゃく", romaji: "kyuuhyaku" },
+
+      // 千位數 (注意 3000, 8000)
+      { jp: "1,000", kana: "せん", romaji: "sen" },
+      { jp: "2,000", kana: "にせん", romaji: "nisen" },
+      { jp: "3,000", kana: "さんぜん", romaji: "sanzen" },
+      { jp: "4,000", kana: "よんせん", romaji: "yonsen" },
+      { jp: "5,000", kana: "ごせん", romaji: "gosen" },
+      { jp: "6,000", kana: "ろくせん", romaji: "rokusen" },
+      { jp: "7,000", kana: "ななせん", romaji: "nanasen" },
+      { jp: "8,000", kana: "はっせん", romaji: "hassen" },
+      { jp: "9,000", kana: "きゅうせん", romaji: "kyuusen" },
+
+      // 萬以上
+      { jp: "10,000", kana: "いちまん", romaji: "ichiman" },
+      { jp: "100,000", kana: "じゅうまん", romaji: "juuman" },
+      { jp: "1,000,000", kana: "ひゃくまん", romaji: "hyakuman" },
+      { jp: "10,000,000", kana: "せんまん", romaji: "senman" },
+      { jp: "100,000,000", kana: "いちおく", romaji: "ichioku" },
+    ]
+  },
+  time: {
+    title: "時間 (Time)",
+    icon: Clock,
+    description: "注意 4、7、9 的唸法。",
+    items: [
+      { label: "1:00", kana: "いちじ", romaji: "ichiji" },
+      { label: "2:00", kana: "にじ", romaji: "niji" },
+      { label: "3:00", kana: "さんじ", romaji: "sanji" },
+      { label: "4:00", kana: "よじ (注意)", romaji: "yoji", highlight: true },
+      { label: "5:00", kana: "ごじ", romaji: "goji" },
+      { label: "6:00", kana: "ろくじ", romaji: "rokuji" },
+      { label: "7:00", kana: "しちじ (注意)", romaji: "shichiji", highlight: true },
+      { label: "8:00", kana: "はちじ", romaji: "hachiji" },
+      { label: "9:00", kana: "くじ (注意)", romaji: "kuji", highlight: true },
+      { label: "10:00", kana: "じゅうじ", romaji: "juuji" },
+      { label: "11:00", kana: "じゅういちじ", romaji: "juuichiji" },
+      { label: "12:00", kana: "じゅうにじ", romaji: "juuniji" },
+      { label: "幾點", kana: "なんじ", romaji: "nanji" },
+    ],
+    minutes: [
+      { label: "1分", kana: "いっぷん", romaji: "ippun" },
+      { label: "2分", kana: "にふん", romaji: "nifun" },
+      { label: "3分", kana: "さんぷん", romaji: "sanpun" },
+      { label: "4分", kana: "よんぷん", romaji: "yonpun" },
+      { label: "5分", kana: "ごふん", romaji: "gofun" },
+      { label: "6分", kana: "ろっぷん", romaji: "roppun" },
+      { label: "7分", kana: "ななふん", romaji: "nanafun" },
+      { label: "8分", kana: "はっぷん", romaji: "happun" },
+      { label: "9分", kana: "きゅうふん", romaji: "kyuufun" },
+      { label: "10分", kana: "じゅっぷん", romaji: "juppun" },
+      { label: "15分", kana: "じゅうごふん", romaji: "juugofun" },
+      { label: "30分", kana: "はん", romaji: "han (半)" },
+      { label: "幾分", kana: "なんぷん", romaji: "nanpun" },
+    ],
+    periods: [
+      { label: "上午", kana: "ごぜん", romaji: "gozen" },
+      { label: "下午", kana: "ごご", romaji: "gogo" },
+      { label: "現在", kana: "いま", romaji: "ima" },
+    ]
+  },
+  timeWords: {
+    title: "時候 (Time Words)",
+    icon: Watch,
+    description: "學習天、週、月、年的時間軸說法。",
+    tables: [
+      {
+        title: "天與時段 (Days & Time of Day)",
+        headers: ["前天", "昨天", "今天", "明天", "後天", "每天"],
+        rows: [
+          { label: "日子", cells: [
+            { jp: "一昨日", kana: "おととい" },
+            { jp: "昨日", kana: "きのう" },
+            { jp: "今日", kana: "きょう" },
+            { jp: "明日", kana: "あした" },
+            { jp: "明後日", kana: "あさって" },
+            { jp: "毎日", kana: "まいにち" }
+          ]},
+          { label: "早上", cells: [
+            { jp: "一昨日の朝", kana: "おとといのあさ" },
+            { jp: "昨日の朝", kana: "きのうのあさ" },
+            { jp: "今朝", kana: "けさ" },
+            { jp: "明日の朝", kana: "あしたのあさ" },
+            { jp: "明後日の朝", kana: "あさってのあさ" },
+            { jp: "毎朝", kana: "まいあさ" }
+          ]},
+          { label: "晚上", cells: [
+            { jp: "一昨日の晩", kana: "おとといのばん" },
+            { jp: "昨夜", kana: "ゆうべ" },
+            { jp: "今晩", kana: "こんばん" },
+            { jp: "明日の晩", kana: "あしたのばん" },
+            { jp: "明後日の晩", kana: "あさってのばん" },
+            { jp: "毎晩", kana: "まいばん" }
+          ]}
+        ]
+      },
+      {
+        title: "週・月・年 (Week / Month / Year)",
+        headers: ["上上~", "上~", "這/本~", "下~", "下下~", "每~"],
+        rows: [
+          { label: "週", cells: [
+            { jp: "先々週", kana: "せんせんしゅう" },
+            { jp: "先週", kana: "せんしゅう" },
+            { jp: "今週", kana: "こんしゅう" },
+            { jp: "来週", kana: "らいしゅう" },
+            { jp: "再来週", kana: "さらいしゅう" },
+            { jp: "毎週", kana: "まいしゅう" }
+          ]},
+          { label: "月", cells: [
+            { jp: "先々月", kana: "せんせんげつ" },
+            { jp: "先月", kana: "せんげつ" },
+            { jp: "今月", kana: "こんげつ" },
+            { jp: "来月", kana: "らいげつ" },
+            { jp: "再来月", kana: "さらいげつ" },
+            { jp: "毎月", kana: "まいつき" }
+          ]},
+          { label: "年", cells: [
+            { jp: "一昨年", kana: "おととし" },
+            { jp: "去年", kana: "きょねん" },
+            { jp: "今年", kana: "ことし" },
+            { jp: "来年", kana: "らいねん" },
+            { jp: "再来年", kana: "さらいねん" },
+            { jp: "毎年", kana: "まいとし" }
+          ]}
+        ]
+      }
+    ]
+  },
+  counters: {
+    title: "量詞 (Counters)",
+    icon: Layers,
+    description: "注意數字與量詞結合時的發音變化，紅色為特殊發音。",
+    groups: [
+      {
+        label: "通用・人物",
+        items: [
+          { 
+            unit: "～つ (個)", 
+            list: [
+              { num: 1, val: "ひとつ" }, 
+              { num: 2, val: "ふたつ" }, 
+              { num: 3, val: "みっつ" }, 
+              { num: 4, val: "よっつ" }, 
+              { num: 5, val: "いつつ" }, 
+              { num: 6, val: "むっつ" }, 
+              { num: 7, val: "ななつ" }, 
+              { num: 8, val: "やっつ" }, 
+              { num: 9, val: "ここのつ" }, 
+              { num: 10, val: "とお" }, 
+              { num: "?", val: "いくつ" }
+            ]
+          },
+          { 
+            unit: "～人 (人)", 
+            list: [
+              { num: 1, val: "ひとり", highlight: true }, 
+              { num: 2, val: "ふたり", highlight: true }, 
+              { num: 3, val: "さんにん" }, 
+              { num: 4, val: "よにん", highlight: true }, 
+              { num: 5, val: "ごにん" }, 
+              { num: 6, val: "ろくにん" }, 
+              { num: 7, val: "しちにん" }, 
+              { num: 8, val: "はちにん" }, 
+              { num: 9, val: "きゅうにん" }, 
+              { num: 10, val: "じゅうにん" }, 
+              { num: "?", val: "なんにん" }
+            ]
+          }
+        ]
+      },
+      {
+        label: "規則變化 (無特殊音變)",
+        items: [
+          { 
+            unit: "～枚 (張/件)", 
+            list: [
+              { num: 1, val: "いちまい" }, 
+              { num: 2, val: "にまい" }, 
+              { num: 3, val: "さんまい" }, 
+              { num: 4, val: "よんまい" }, 
+              { num: 5, val: "ごまい" }, 
+              { num: 6, val: "ろくまい" }, 
+              { num: 7, val: "ななまい" }, 
+              { num: 8, val: "はちまい" }, 
+              { num: 9, val: "きゅうまい" }, 
+              { num: 10, val: "じゅうまい" }, 
+              { num: "?", val: "なんまい" }
+            ]
+          },
+          { 
+            unit: "～台 (台/輛)", 
+            list: [
+              { num: 1, val: "いちだい" }, 
+              { num: 2, val: "にだい" }, 
+              { num: 3, val: "さんだい" }, 
+              { num: 4, val: "よんだい" }, 
+              { num: 5, val: "ごだい" }, 
+              { num: 6, val: "ろくだい" }, 
+              { num: 7, val: "ななだい" }, 
+              { num: 8, val: "はちだい" }, 
+              { num: 9, val: "きゅうだい" }, 
+              { num: 10, val: "じゅうだい" }, 
+              { num: "?", val: "なんだい" }
+            ]
+          },
+          { 
+            unit: "～番 (號)", 
+            list: [
+              { num: 1, val: "いちばん" }, 
+              { num: 2, val: "にばん" }, 
+              { num: 3, val: "さんばん" }, 
+              { num: 4, val: "よんばん" }, 
+              { num: 5, val: "ごばん" }, 
+              { num: 6, val: "ろくばん" }, 
+              { num: 7, val: "ななばん" }, 
+              { num: 8, val: "はちばん" }, 
+              { num: 9, val: "きゅうばん" }, 
+              { num: 10, val: "じゅうばん" }, 
+              { num: "?", val: "なんばん" }
+            ]
+          },
+        ]
+      },
+      {
+        label: "音變：歲・冊・回・個 (1, 8, 10 促音)",
+        items: [
+          { 
+            unit: "～歳 (歲)", 
+            list: [
+              { num: 1, val: "いっさい", highlight: true }, 
+              { num: 2, val: "にさい" }, 
+              { num: 3, val: "さんさい" }, 
+              { num: 4, val: "よんさい" }, 
+              { num: 5, val: "ごさい" }, 
+              { num: 6, val: "ろくさい" }, 
+              { num: 7, val: "ななさい" }, 
+              { num: 8, val: "はっさい", highlight: true }, 
+              { num: 9, val: "きゅうさい" }, 
+              { num: 10, val: "じゅっさい", highlight: true }, 
+              { num: 20, val: "はたち", highlight: true }, 
+              { num: "?", val: "なんさい" }
+            ]
+          },
+          { 
+            unit: "～冊 (本)", 
+            list: [
+              { num: 1, val: "いっさつ", highlight: true }, 
+              { num: 2, val: "にさつ" }, 
+              { num: 3, val: "さんさつ" }, 
+              { num: 4, val: "よんさつ" }, 
+              { num: 5, val: "ごさつ" }, 
+              { num: 6, val: "ろくさつ" }, 
+              { num: 7, val: "ななさつ" }, 
+              { num: 8, val: "はっさつ", highlight: true }, 
+              { num: 9, val: "きゅうさつ" }, 
+              { num: 10, val: "じゅっさつ", highlight: true }, 
+              { num: "?", val: "なんさつ" }
+            ]
+          },
+          { 
+            unit: "～回 (次)", 
+            list: [
+              { num: 1, val: "いっかい", highlight: true }, 
+              { num: 2, val: "にかい" }, 
+              { num: 3, val: "さんかい" }, 
+              { num: 4, val: "よんかい" }, 
+              { num: 5, val: "ごかい" }, 
+              { num: 6, val: "ろっかい", highlight: true }, 
+              { num: 7, val: "ななかい" }, 
+              { num: 8, val: "はっかい", highlight: true }, 
+              { num: 9, val: "きゅうかい" }, 
+              { num: 10, val: "じゅっかい", highlight: true }, 
+              { num: "?", val: "なんかい" }
+            ]
+          },
+          { 
+            unit: "～個 (個)", 
+            list: [
+              { num: 1, val: "いっこ", highlight: true }, 
+              { num: 2, val: "にこ" }, 
+              { num: 3, val: "さんこ" }, 
+              { num: 4, val: "よんこ" }, 
+              { num: 5, val: "ごこ" }, 
+              { num: 6, val: "ろっこ", highlight: true }, 
+              { num: 7, val: "ななこ" }, 
+              { num: 8, val: "はっこ", highlight: true }, 
+              { num: 9, val: "きゅうこ" }, 
+              { num: 10, val: "じゅっこ", highlight: true }, 
+              { num: "?", val: "なんこ" }
+            ]
+          }
+        ]
+      },
+      {
+        label: "音變：着・階・足・軒 (濁音與促音)",
+        items: [
+          { 
+            unit: "～着 (件)", 
+            list: [
+              { num: 1, val: "いっちゃく", highlight: true }, 
+              { num: 2, val: "にちゃく" }, 
+              { num: 3, val: "さんちゃく" }, 
+              { num: 4, val: "よんちゃく" }, 
+              { num: 5, val: "ごちゃく" }, 
+              { num: 6, val: "ろくちゃく" }, 
+              { num: 7, val: "ななちゃく" }, 
+              { num: 8, val: "はっちゃく", highlight: true }, 
+              { num: 9, val: "きゅうちゃく" }, 
+              { num: 10, val: "じゅっちゃく", highlight: true }, 
+              { num: "?", val: "なんちゃく" }
+            ]
+          },
+          { 
+            unit: "～階 (樓)", 
+            list: [
+              { num: 1, val: "いっかい", highlight: true }, 
+              { num: 2, val: "にかい" }, 
+              { num: 3, val: "さんがい", highlight: true }, 
+              { num: 4, val: "よんかい" }, 
+              { num: 5, val: "ごかい" }, 
+              { num: 6, val: "ろっかい", highlight: true }, 
+              { num: 7, val: "ななかい" }, 
+              { num: 8, val: "はっかい", highlight: true }, 
+              { num: 9, val: "きゅうかい" }, 
+              { num: 10, val: "じゅっかい", highlight: true }, 
+              { num: "?", val: "なんがい" }
+            ]
+          },
+          { 
+            unit: "～足 (雙)", 
+            list: [
+              { num: 1, val: "いっそく", highlight: true }, 
+              { num: 2, val: "にそく" }, 
+              { num: 3, val: "さんぞく", highlight: true }, 
+              { num: 4, val: "よんそく" }, 
+              { num: 5, val: "ごそく" }, 
+              { num: 6, val: "ろくそく" }, 
+              { num: 7, val: "ななそく" }, 
+              { num: 8, val: "はっそく", highlight: true }, 
+              { num: 9, val: "きゅうそく" }, 
+              { num: 10, val: "じゅっそく", highlight: true }, 
+              { num: "?", val: "なんぞく" }
+            ]
+          },
+          { 
+            unit: "～軒 (房屋)", 
+            list: [
+              { num: 1, val: "いっけん", highlight: true }, 
+              { num: 2, val: "にけん" }, 
+              { num: 3, val: "さんげん", highlight: true }, 
+              { num: 4, val: "よんけん" }, 
+              { num: 5, val: "ごけん" }, 
+              { num: 6, val: "ろっけん", highlight: true }, 
+              { num: 7, val: "ななけん" }, 
+              { num: 8, val: "はっけん", highlight: true }, 
+              { num: 9, val: "きゅうけん" }, 
+              { num: 10, val: "じゅっけん", highlight: true }, 
+              { num: "?", val: "なんげん" }
+            ]
+          }
+        ]
+      },
+      {
+        label: "音變：本・杯・匹 (h行大幅變化)",
+        items: [
+          { 
+            unit: "～本 (細長)", 
+            list: [
+              { num: 1, val: "いっぽん", highlight: true }, 
+              { num: 2, val: "にほん" }, 
+              { num: 3, val: "さんぼん", highlight: true }, 
+              { num: 4, val: "よんほん" }, 
+              { num: 5, val: "ごほん" }, 
+              { num: 6, val: "ろっぽん", highlight: true }, 
+              { num: 7, val: "ななほん" }, 
+              { num: 8, val: "はっぽん", highlight: true }, 
+              { num: 9, val: "きゅうほん" }, 
+              { num: 10, val: "じゅっぽん", highlight: true }, 
+              { num: "?", val: "なんぼん" }
+            ]
+          },
+          { 
+            unit: "～杯 (杯)", 
+            list: [
+              { num: 1, val: "いっぱい", highlight: true }, 
+              { num: 2, val: "にはい" }, 
+              { num: 3, val: "さんばい", highlight: true }, 
+              { num: 4, val: "よんはい" }, 
+              { num: 5, val: "ごはい" }, 
+              { num: 6, val: "ろっぱい", highlight: true }, 
+              { num: 7, val: "ななはい" }, 
+              { num: 8, val: "はっぱい", highlight: true }, 
+              { num: 9, val: "きゅうはい" }, 
+              { num: 10, val: "じゅっぱい", highlight: true }, 
+              { num: "?", val: "なんばい" }
+            ]
+          },
+          { 
+            unit: "～匹 (小動物)", 
+            list: [
+              { num: 1, val: "いっぴき", highlight: true }, 
+              { num: 2, val: "にひき" }, 
+              { num: 3, val: "さんびき", highlight: true }, 
+              { num: 4, val: "よんひき" }, 
+              { num: 5, val: "ごひき" }, 
+              { num: 6, val: "ろっぴき", highlight: true }, 
+              { num: 7, val: "ななひき" }, 
+              { num: 8, val: "はっぴき", highlight: true }, 
+              { num: 9, val: "きゅうひき" }, 
+              { num: 10, val: "じゅっぴき", highlight: true }, 
+              { num: "?", val: "なんびき" }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  calendar: {
+    title: "日期與星期 (Calendar)",
+    icon: Calendar,
+    description: "注意4、7、9月的唸法。日期中1-10、14、20、24號是特殊讀音。",
+    weekdays: [
+      { label: "日", kanji: "日曜日", kana: "にちようび", romaji: "nichiyoubi" },
+      { label: "一", kanji: "月曜日", kana: "げつようび", romaji: "getsuyoubi" },
+      { label: "二", kanji: "火曜日", kana: "かようび", romaji: "kayoubi" },
+      { label: "三", kanji: "水曜日", kana: "すいようび", romaji: "suiyoubi" },
+      { label: "四", kanji: "木曜日", kana: "もくようび", romaji: "mokuyoubi" },
+      { label: "五", kanji: "金曜日", kana: "きんようび", romaji: "kinyoubi" },
+      { label: "六", kanji: "土曜日", kana: "どようび", romaji: "doyoubi" },
+      { label: "幾", kanji: "何曜日", kana: "なんようび", romaji: "nanyoubi" },
+    ],
+    months: [
+      { label: "1月", kana: "いちがつ", romaji: "ichigatsu" },
+      { label: "2月", kana: "にがつ", romaji: "nigatsu" },
+      { label: "3月", kana: "さんがつ", romaji: "sangatsu" },
+      { label: "4月", kana: "しがつ (注意)", romaji: "shigatsu", highlight: true },
+      { label: "5月", kana: "ごがつ", romaji: "gogatsu" },
+      { label: "6月", kana: "ろくがつ", romaji: "rokugatsu" },
+      { label: "7月", kana: "しちがつ (注意)", romaji: "shichigatsu", highlight: true },
+      { label: "8月", kana: "はちがつ", romaji: "hachigatsu" },
+      { label: "9月", kana: "くがつ (注意)", romaji: "kugatsu", highlight: true },
+      { label: "10月", kana: "じゅうがつ", romaji: "juugatsu" },
+      { label: "11月", kana: "じゅういちがつ", romaji: "juuichigatsu" },
+      { label: "12月", kana: "じゅうにがつ", romaji: "juunigatsu" },
+      { label: "幾月", kana: "なんがつ", romaji: "nangatsu" },
+    ],
+    days: [
+      { label: "1日", kana: "ついたち", romaji: "tsuitachi", highlight: true },
+      { label: "2日", kana: "ふつか", romaji: "futsuka", highlight: true },
+      { label: "3日", kana: "みっか", romaji: "mikka", highlight: true },
+      { label: "4日", kana: "よっか", romaji: "yokka", highlight: true },
+      { label: "5日", kana: "いつか", romaji: "itsuka", highlight: true },
+      { label: "6日", kana: "むいか", romaji: "muika", highlight: true },
+      { label: "7日", kana: "なのか", romaji: "nanoka", highlight: true },
+      { label: "8日", kana: "ようか", romaji: "youka", highlight: true },
+      { label: "9日", kana: "ここのか", romaji: "kokonoka", highlight: true },
+      { label: "10日", kana: "とおか", romaji: "tooka", highlight: true },
+      { label: "11日", kana: "じゅういちにち", romaji: "juuichinichi" },
+      { label: "12日", kana: "じゅうににち", romaji: "juuninichi" },
+      { label: "13日", kana: "じゅうさんにち", romaji: "juusannichi" },
+      { label: "14日", kana: "じゅうよっか", romaji: "juuyokka", highlight: true },
+      { label: "15日", kana: "じゅうごにち", romaji: "juugonichi" },
+      { label: "16日", kana: "じゅうろくにち", romaji: "juurokunichi" },
+      { label: "17日", kana: "じゅうしちにち", romaji: "juushichinichi" },
+      { label: "18日", kana: "じゅうはちにち", romaji: "juuhachinichi" },
+      { label: "19日", kana: "じゅうくにち", romaji: "juukunichi" },
+      { label: "20日", kana: "はつか", romaji: "hatsuka", highlight: true },
+      { label: "21日", kana: "にじゅういちにち", romaji: "nijuuichinichi" },
+      { label: "22日", kana: "にじゅうににち", romaji: "nijuuninichi" },
+      { label: "23日", kana: "にじゅうさんにち", romaji: "nijuusannichi" },
+      { label: "24日", kana: "にじゅうよっか", romaji: "nijuuyokka", highlight: true },
+      { label: "25日", kana: "にじゅうごにち", romaji: "nijuugonichi" },
+      { label: "26日", kana: "にじゅうろくにち", romaji: "nijuurokunichi" },
+      { label: "27日", kana: "にじゅうしちにち", romaji: "nijuushichinichi" },
+      { label: "28日", kana: "にじゅうはちにち", romaji: "nijuuhachinichi" },
+      { label: "29日", kana: "にじゅうくにち", romaji: "nijuukunichi" },
+      { label: "30日", kana: "さんじゅうにち", romaji: "sanjuunichi" },
+      { label: "31日", kana: "さんじゅういちにち", romaji: "sanjuuichinichi" },
+      { label: "幾號", kana: "なんにち", romaji: "nannichi" },
+    ]
+  },
+  family: {
+    title: "家族稱謂 (Family)",
+    icon: Users,
+    description: "稱呼自己的家人 vs 稱呼別人的家人。",
+    items: [
+      { relation: "祖父", my: "祖父 (そふ)", other: "おじいさん" },
+      { relation: "祖母", my: "祖母 (そぼ)", other: "おばあさん" },
+      { relation: "父", my: "父 (ちち)", other: "お父さん (おとうさん)" },
+      { relation: "母", my: "母 (はは)", other: "お母さん (おかあさん)" },
+      { relation: "兄", my: "兄 (あに)", other: "お兄さん (おにいさん)" },
+      { relation: "姉", my: "姉 (あね)", other: "お姉さん (おねえさん)" },
+      { relation: "弟", my: "弟 (おとうと)", other: "弟さん (おとうとさん)" },
+      { relation: "妹", my: "妹 (いもうと)", other: "妹さん (いもうとさん)" },
+      { relation: "丈夫", my: "夫 (おっと) / 主人 (しゅじん)", other: "ご主人 (ごしゅじん)" },
+      { relation: "妻子", my: "妻 (つま) / 家内 (かない)", other: "奥さん (おくさん)" },
+    ]
+  }
+};
+
 // --- 組件 ---
 
 const VocabularyList = ({ vocab, relatedVocab }) => (
@@ -906,13 +1455,269 @@ const QuizSection = ({ quiz, isReviewMode = false }) => {
   );
 };
 
+// --- 附錄組件 ---
+const AppendixSection = () => {
+  const [activeCategory, setActiveCategory] = useState('numbers');
+  
+  const categories = [
+    { id: 'numbers', label: '數字', icon: appendixData.numbers.icon },
+    { id: 'time', label: '時間', icon: appendixData.time.icon },
+    { id: 'timeWords', label: '時候', icon: appendixData.timeWords.icon },
+    { id: 'calendar', label: '日期', icon: appendixData.calendar.icon },
+    { id: 'counters', label: '量詞', icon: appendixData.counters.icon },
+    { id: 'family', label: '家族', icon: appendixData.family.icon },
+  ];
+
+  const renderContent = () => {
+    switch(activeCategory) {
+      case 'numbers':
+        return (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {appendixData.numbers.items.map((item, idx) => (
+              <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm text-center">
+                <div className="text-2xl font-bold text-indigo-600 mb-1">{item.jp}</div>
+                <div className="text-sm font-medium text-gray-800 mb-1">{item.kana}</div>
+                <div className="text-xs text-gray-500">{item.romaji}</div>
+              </div>
+            ))}
+          </div>
+        );
+      case 'time':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h4 className="font-bold text-gray-700 mb-3 border-l-4 border-indigo-500 pl-2">時段 (Period)</h4>
+              <div className="flex gap-4">
+                {appendixData.time.periods.map((item, idx) => (
+                  <div key={idx} className="bg-indigo-50 px-4 py-3 rounded-lg border border-indigo-100 flex-1 text-center">
+                    <div className="font-bold text-indigo-800 text-lg mb-1">{item.label}</div>
+                    <div className="text-sm text-gray-600">{item.kana}</div>
+                    <div className="text-xs text-gray-400">{item.romaji}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-700 mb-3 border-l-4 border-indigo-500 pl-2">小時 (Hour)</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {appendixData.time.items.map((item, idx) => (
+                  <div key={idx} className={`bg-white p-3 rounded-lg border ${item.highlight ? 'border-red-300 bg-red-50' : 'border-gray-200'} shadow-sm`}>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-bold text-gray-800">{item.label}</span>
+                      {item.highlight && <span className="text-[10px] bg-red-100 text-red-600 px-1 rounded">注意</span>}
+                    </div>
+                    <div className={`text-sm ${item.highlight ? 'text-red-700 font-bold' : 'text-gray-600'}`}>{item.kana}</div>
+                    <div className="text-xs text-gray-400">{item.romaji}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-700 mb-3 border-l-4 border-indigo-500 pl-2">分鐘 (Minute)</h4>
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {appendixData.time.minutes.map((item, idx) => (
+                  <div key={idx} className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                    <div className="font-bold text-gray-800 mb-1">{item.label}</div>
+                    <div className="text-sm text-gray-600">{item.kana}</div>
+                    <div className="text-xs text-gray-400">{item.romaji}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      case 'timeWords':
+        return (
+          <div className="space-y-12">
+            {appendixData.timeWords.tables.map((table, tIdx) => (
+              <div key={tIdx}>
+                <h4 className="font-bold text-gray-700 mb-4 flex items-center">
+                  <span className="bg-indigo-600 text-white p-1 rounded mr-2"><Clock size={16}/></span>
+                  {table.title}
+                </h4>
+                
+                {/* 響應式捲動容器 */}
+                <div className="overflow-x-auto border border-gray-200 rounded-xl shadow-sm">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-indigo-50">
+                      <tr>
+                        <th className="py-3 px-4 text-left text-xs font-bold text-indigo-500 uppercase tracking-wider sticky left-0 bg-indigo-50 z-10 w-24">
+                          分類
+                        </th>
+                        {table.headers.map((header, hIdx) => (
+                          <th key={hIdx} className="py-3 px-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider min-w-[100px]">
+                            {header}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {table.rows.map((row, rIdx) => (
+                        <tr key={rIdx} className={rIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
+                          <td className="py-3 px-4 text-sm font-bold text-indigo-700 sticky left-0 bg-white z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] border-r border-gray-100">
+                            {row.label}
+                          </td>
+                          {row.cells.map((cell, cIdx) => (
+                            <td key={cIdx} className="py-3 px-2 text-center align-top">
+                              <div className="text-lg font-bold text-gray-800">{cell.jp}</div>
+                              <div className="text-xs text-gray-500 font-medium mt-0.5">{cell.kana}</div>
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-xs text-gray-400 mt-2 text-right">* 手機版可左右滑動查看完整表格</p>
+              </div>
+            ))}
+          </div>
+        );
+      case 'calendar':
+        return (
+           <div className="space-y-6">
+            <div>
+              <h4 className="font-bold text-gray-700 mb-3 border-l-4 border-indigo-500 pl-2">星期 (Weekdays)</h4>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {appendixData.calendar.weekdays.map((item, idx) => (
+                  <div key={idx} className="bg-indigo-50 p-3 rounded-md border border-indigo-100 text-center">
+                    <div className="text-xs text-indigo-400 font-bold mb-1">{item.label}</div>
+                    <div className="font-bold text-indigo-800 text-lg">{item.kanji}</div>
+                    <div className="text-xs text-gray-600 mt-1">{item.kana}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-700 mb-3 border-l-4 border-indigo-500 pl-2">月份 (Months)</h4>
+              <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+                 {appendixData.calendar.months.map((item, idx) => (
+                  <div key={idx} className={`bg-white p-3 rounded-lg border ${item.highlight ? 'border-red-300 bg-red-50' : 'border-gray-200'} shadow-sm`}>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-bold text-gray-800">{item.label}</span>
+                      {item.highlight && <span className="text-[10px] bg-red-100 text-red-600 px-1 rounded">注意</span>}
+                    </div>
+                    <div className={`text-sm ${item.highlight ? 'text-red-700 font-bold' : 'text-gray-700'}`}>{item.kana}</div>
+                    <div className="text-xs text-gray-400">{item.romaji}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-700 mb-3 border-l-4 border-indigo-500 pl-2">日期讀音 (Days)</h4>
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+                 {appendixData.calendar.days.map((item, idx) => (
+                  <div key={idx} className={`bg-white p-3 rounded-lg border ${item.highlight ? 'border-orange-300 bg-orange-50' : 'border-gray-200'} shadow-sm`}>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-bold text-gray-800">{item.label}</span>
+                      {item.highlight && <span className="text-[10px] bg-orange-200 text-orange-700 px-1 rounded">特</span>}
+                    </div>
+                    <div className={`text-sm ${item.highlight ? 'text-orange-700 font-bold' : 'text-gray-600'}`}>{item.romaji}</div>
+                    <div className="text-xs text-gray-400 mt-1">{item.kana}</div> 
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      case 'counters':
+        return (
+          <div className="space-y-10">
+            {appendixData.counters.groups.map((group, gIdx) => (
+              <div key={gIdx}>
+                <h4 className="font-bold text-gray-700 mb-4 flex items-center border-b pb-2">
+                  <span className="bg-emerald-600 text-white p-1 rounded mr-2"><Layers size={16}/></span>
+                  {group.label}
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {group.items.map((item, iIdx) => (
+                    <div key={iIdx} className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                      <div className="bg-emerald-50 px-4 py-2 border-b border-emerald-100 font-bold text-emerald-800 text-center">
+                        {item.unit}
+                      </div>
+                      <div className="divide-y divide-gray-100">
+                        {item.list.map((row, rIdx) => (
+                          <div key={rIdx} className="flex px-4 py-2 text-sm hover:bg-gray-50">
+                            <span className="w-8 font-bold text-gray-400">{row.num}</span>
+                            <span className={`flex-1 font-medium ${row.highlight ? 'text-red-600' : 'text-gray-700'}`}>
+                              {row.val}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+       case 'family':
+        return (
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">稱謂</th>
+                  <th className="py-3 px-4 text-left text-sm font-semibold text-indigo-700">自己的家人 (謙稱)</th>
+                  <th className="py-3 px-4 text-left text-sm font-semibold text-emerald-700">別人的家人 (尊稱)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {appendixData.family.items.map((item, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="py-3 px-4 font-medium text-gray-800">{item.relation}</td>
+                    <td className="py-3 px-4 text-gray-600">{item.my}</td>
+                    <td className="py-3 px-4 text-gray-600">{item.other}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex space-x-2 overflow-x-auto pb-4 mb-4">
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => setActiveCategory(cat.id)}
+            className={`flex items-center px-4 py-2 rounded-full whitespace-nowrap transition-colors ${
+              activeCategory === cat.id 
+                ? 'bg-indigo-600 text-white shadow-md' 
+                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            <cat.icon size={16} className="mr-2" />
+            {cat.label}
+          </button>
+        ))}
+      </div>
+      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <div className="mb-6">
+           <h3 className="text-2xl font-bold text-gray-800">{appendixData[activeCategory].title}</h3>
+           {appendixData[activeCategory].description && (
+             <p className="text-gray-500 mt-1">{appendixData[activeCategory].description}</p>
+           )}
+        </div>
+        {renderContent()}
+      </div>
+    </div>
+  );
+};
+
 // --- 主應用程式 ---
 
 const App = () => {
   const [currentLessonId, setCurrentLessonId] = useState(1);
   const [activeTab, setActiveTab] = useState('vocab'); // 'vocab', 'grammar', 'quiz'
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [reviewMode, setReviewMode] = useState(false);
+  const [viewMode, setViewMode] = useState('lesson'); // 'lesson', 'review', 'appendix'
   const [reviewQuestions, setReviewQuestions] = useState([]);
 
   const currentLesson = lessonsData.find(l => l.id === currentLessonId);
@@ -936,18 +1741,24 @@ const App = () => {
     }
     
     setReviewQuestions(allQuestions.slice(0, 20));
-    setReviewMode(true);
+    setViewMode('review');
     setIsSidebarOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleLessonChange = (id) => {
-    setReviewMode(false);
+    setViewMode('lesson');
     setCurrentLessonId(id);
     setActiveTab('vocab');
     setIsSidebarOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const switchToAppendix = () => {
+    setViewMode('appendix');
+    setIsSidebarOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-gray-800 font-sans">
@@ -992,33 +1803,50 @@ const App = () => {
                   key={lesson.id}
                   onClick={() => handleLessonChange(lesson.id)}
                   className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center justify-between group ${
-                    !reviewMode && currentLessonId === lesson.id
+                    viewMode === 'lesson' && currentLessonId === lesson.id
                       ? 'bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
                   <span className="truncate">第 {lesson.id} 課</span>
-                  {!reviewMode && currentLessonId === lesson.id && <ChevronRight size={16} />}
+                  {viewMode === 'lesson' && currentLessonId === lesson.id && <ChevronRight size={16} />}
                 </button>
               ))}
             </div>
 
-            <div className="mt-8 border-t border-dashed border-gray-200 pt-6">
-              <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 px-2">自我挑戰</h2>
+            <div className="mt-8 border-t border-dashed border-gray-200 pt-6 space-y-2">
+              <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">自我挑戰 & 資源</h2>
+              
               <button
                 onClick={startReviewQuiz}
                 className={`w-full text-left px-4 py-3 rounded-lg text-sm font-bold transition-all flex items-center justify-between group border-2 ${
-                  reviewMode
+                  viewMode === 'review'
                     ? 'bg-amber-50 text-amber-700 border-amber-300 shadow-md'
                     : 'bg-white text-gray-700 border-gray-200 hover:border-amber-300 hover:bg-amber-50'
                 }`}
               >
                 <div className="flex items-center">
-                  <Trophy size={18} className={`mr-2 ${reviewMode ? 'text-amber-500' : 'text-gray-400 group-hover:text-amber-500'}`} />
+                  <Trophy size={18} className={`mr-2 ${viewMode === 'review' ? 'text-amber-500' : 'text-gray-400 group-hover:text-amber-500'}`} />
                   <span>總複習測驗 (20題)</span>
                 </div>
-                {reviewMode && <ChevronRight size={16} />}
+                {viewMode === 'review' && <ChevronRight size={16} />}
               </button>
+
+              <button
+                onClick={switchToAppendix}
+                className={`w-full text-left px-4 py-3 rounded-lg text-sm font-bold transition-all flex items-center justify-between group border-2 ${
+                  viewMode === 'appendix'
+                    ? 'bg-blue-50 text-blue-700 border-blue-300 shadow-md'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                }`}
+              >
+                <div className="flex items-center">
+                  <BookOpen size={18} className={`mr-2 ${viewMode === 'appendix' ? 'text-blue-500' : 'text-gray-400 group-hover:text-blue-500'}`} />
+                  <span>實用附錄資料</span>
+                </div>
+                {viewMode === 'appendix' && <ChevronRight size={16} />}
+              </button>
+
             </div>
             
             <div className="mt-8 px-4 py-4 bg-orange-50 rounded-xl border border-orange-100">
@@ -1027,7 +1855,7 @@ const App = () => {
                 <div>
                   <h4 className="text-sm font-bold text-orange-800">老師的小叮嚀</h4>
                   <p className="text-xs text-orange-700 mt-1 leading-relaxed">
-                    新增了「總複習」功能！當你學完前6課後，記得來挑戰看看隨機抽出的 20 道題目喔！
+                    別忘了多看附錄裡的「數字」和「日期」念法，尤其是 4、7、9 和 1-10 號的日期，是考試最常出的陷阱喔！
                   </p>
                 </div>
               </div>
@@ -1047,7 +1875,7 @@ const App = () => {
         <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
           <div className="max-w-4xl mx-auto">
             
-            {reviewMode ? (
+            {viewMode === 'review' && (
               // 總複習模式視圖
               <div className="animate-fade-in-up">
                 <div className="mb-8 border-b border-gray-200 pb-6">
@@ -1062,7 +1890,26 @@ const App = () => {
                 </div>
                 <QuizSection quiz={reviewQuestions} isReviewMode={true} />
               </div>
-            ) : (
+            )}
+
+            {viewMode === 'appendix' && (
+              // 附錄模式視圖
+              <div className="animate-fade-in-up">
+                 <div className="mb-8 border-b border-gray-200 pb-6">
+                  <div className="flex items-center space-x-2 text-blue-600 font-semibold mb-2">
+                    <BookOpen size={20} />
+                    <span className="uppercase tracking-wide">APPENDIX</span>
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">實用附錄資料庫</h2>
+                  <p className="text-lg text-gray-600">
+                    這裡整理了學習日語必備的基礎資料，包含數字、時間、日期以及家族稱謂。
+                  </p>
+                </div>
+                <AppendixSection />
+              </div>
+            )}
+
+            {viewMode === 'lesson' && (
               // 一般課程視圖
               <>
                 {/* 課程標題 */}
